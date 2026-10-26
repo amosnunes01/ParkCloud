@@ -1,0 +1,372 @@
+/*
+ * Theme Override CSS for ParkCloud App
+ * Matches the uploaded UI designs perfectly (blueprint grid, circuit motifs, glassmorphism)
+ * Supports both Light and Dark themes accurately!
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ==============================================================
+   1. COLOR PALETTES & DESIGN TOKENS
+   ============================================================== */
+
+/* --- DARK THEME (Matches Screenshots 2 & 3: Deep Teal / Charcoal Cyan) --- */
+:root,
+[data-theme="dark"] {
+  --font-sans: "Plus Jakarta Sans", "Poppins", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --bg-primary: #0F1D24;
+  --bg-secondary: #13242D;
+  --bg-card: rgba(18, 35, 44, 0.78);
+  --bg-card-hover: rgba(22, 43, 54, 0.90);
+  --bg-input: #0F1C23;
+  --bg-glass: rgba(18, 35, 44, 0.70);
+
+  --border-color: rgba(91, 155, 176, 0.18);
+  --border-subtle: rgba(91, 155, 176, 0.08);
+  --border-focus: #5B9BB0;
+
+  --text-primary: #F0F6F8;
+  --text-secondary: #8DAAB8;
+  --text-muted: #648291;
+
+  --accent-primary: #5B9BB0;
+  --accent-primary-hover: #6EB2C8;
+  --accent-primary-glow: rgba(91, 155, 176, 0.28);
+
+  --accent-success: #4DB6AC;
+  --accent-success-glow: rgba(77, 182, 172, 0.25);
+  --accent-warning: #F5A623;
+  --accent-danger: #E86B5A;
+  --accent-cyan: #5B9BB0;
+  --accent-purple: #5B9BB0;
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.60);
+  --shadow-glow: 0 0 24px rgba(91, 155, 176, 0.20);
+
+  --grid-line-color: rgba(91, 155, 176, 0.08);
+  --grid-dot-color: rgba(91, 155, 176, 0.22);
+  --route-line-color: rgba(91, 155, 176, 0.12);
+}
+
+/* --- LIGHT THEME (Matches Screenshot 4: Soft Mint Clean Blueprint) --- */
+[data-theme="light"] {
+  --bg-primary: #F0F6F8;
+  --bg-secondary: #FFFFFF;
+  --bg-card: rgba(255, 255, 255, 0.88);
+  --bg-card-hover: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.80);
+
+  --border-color: rgba(91, 155, 176, 0.18);
+  --border-subtle: rgba(91, 155, 176, 0.10);
+  --border-focus: #5B9BB0;
+
+  --text-primary: #12242E;
+  --text-secondary: #4F6D7A;
+  --text-muted: #7E9CA9;
+
+  --accent-primary: #5B9BB0;
+  --accent-primary-hover: #488497;
+  --accent-primary-glow: rgba(91, 155, 176, 0.20);
+
+  --accent-success: #3DA598;
+  --accent-success-glow: rgba(61, 165, 152, 0.20);
+  --accent-warning: #E68A19;
+  --accent-danger: #D9534F;
+  --accent-cyan: #5B9BB0;
+  --accent-purple: #5B9BB0;
+
+  --shadow-sm: 0 2px 6px rgba(18, 36, 46, 0.04);
+  --shadow-md: 0 8px 24px rgba(18, 36, 46, 0.06);
+  --shadow-lg: 0 16px 40px rgba(18, 36, 46, 0.08);
+  --shadow-glow: 0 0 24px rgba(91, 155, 176, 0.14);
+
+  --grid-line-color: rgba(91, 155, 176, 0.09);
+  --grid-dot-color: rgba(91, 155, 176, 0.30);
+  --route-line-color: rgba(91, 155, 176, 0.15);
+}
+
+/* ==============================================================
+   2. BLUEPRINT GRID & INFRASTRUCTURE BACKGROUND SYSTEM
+   ============================================================== */
+body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-sans) !important;
+}
+
+body::before {
+  content: "" !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  background-image: 
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px),
+    radial-gradient(var(--grid-dot-color) 1px, transparent 1px) !important;
+  background-size: 40px 40px, 40px 40px, 40px 40px !important;
+  background-position: -1px -1px, -1px -1px, 19px 19px !important;
+}
+
+/* Subtle circuit route overlay */
+body::after {
+  content: "" !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  background: 
+    radial-gradient(circle at 10% 25%, var(--accent-primary-glow) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, var(--accent-success-glow) 0%, transparent 40%) !important;
+  opacity: 0.6 !important;
+}
+
+/* ==============================================================
+   3. HEADER / NAVIGATION BAR
+   ============================================================== */
+header {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Navigation active tab pill */
+header button.btn-primary,
+header .btn-primary {
+  background: var(--accent-primary) !important;
+  color: #FFFFFF !important;
+  border-radius: 20px !important;
+  border: none !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px var(--accent-primary-glow) !important;
+}
+
+/* Navigation secondary tabs */
+header button.btn-secondary,
+header .btn-secondary {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  border: none !important;
+  border-radius: 20px !important;
+}
+
+header button.btn-secondary:hover {
+  background: var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+/* India Ed. Badge & Region Badge */
+span[style*="rgba(99, 102, 241"],
+div[style*="rgba(99, 102, 241"],
+span[style*="#6366F1"],
+.badge-blue {
+  background: rgba(91, 155, 176, 0.15) !important;
+  color: var(--accent-primary) !important;
+  border-color: rgba(91, 155, 176, 0.3) !important;
+}
+
+/* Logo icon styling */
+header div[style*="38px"][style*="border-radius"],
+header div[style*="border-radius: 10px"] {
+  background: linear-gradient(135deg, #5B9BB0 0%, #3D8296 100%) !important;
+  box-shadow: 0 4px 12px rgba(91, 155, 176, 0.3) !important;
+}
+
+/* User avatar pill */
+div[style*="border-radius: 50%"][style*="background: linear-gradient"] {
+  background: linear-gradient(135deg, #5B9BB0, #3DA598) !important;
+}
+
+/* ==============================================================
+   4. GLASS CARDS & WIDGET CONTAINERS
+   ============================================================== */
+.glass-card {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-md) !important;
+  transition: all 0.25s ease !important;
+}
+
+.glass-card:hover {
+  border-color: rgba(91, 155, 176, 0.35) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Upcoming pass special highlight card (from screenshot) */
+div[style*="border: 1px solid var(--accent-success)"],
+div[style*="border-color: var(--accent-success)"] {
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+}
+
+/* Inner parameter sub-boxes in pass card */
+div[style*="background: var(--bg-secondary)"] {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+}
+
+/* ==============================================================
+   5. BUTTONS & CONTROLS
+   ============================================================== */
+.btn {
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary {
+  background: var(--accent-primary) !important;
+  color: #FFFFFF !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 2px 10px var(--accent-primary-glow) !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover) !important;
+  box-shadow: 0 4px 16px var(--accent-primary-glow) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-secondary {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--accent-primary) !important;
+}
+
+/* Cancel Booking button (coral / warm red from screenshot 3) */
+button[style*="color: var(--accent-danger)"],
+.btn-danger,
+button.btn-danger {
+  background: rgba(232, 107, 90, 0.12) !important;
+  color: #E86B5A !important;
+  border: 1px solid rgba(232, 107, 90, 0.35) !important;
+}
+
+button[style*="color: var(--accent-danger)"]:hover,
+.btn-danger:hover {
+  background: #E86B5A !important;
+  color: #FFFFFF !important;
+}
+
+/* ==============================================================
+   6. QUICK FILL BOX ON LOGIN SCREEN (Screenshot 1)
+   ============================================================== */
+div[style*="padding: 12px 14px"][style*="border-radius: 10px"],
+div[style*="padding: 12px 14px"] {
+  background: rgba(19, 36, 45, 0.6) !important;
+  border: 1px solid rgba(91, 155, 176, 0.25) !important;
+  border-radius: 12px !important;
+}
+
+[data-theme="light"] div[style*="padding: 12px 14px"] {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(91, 155, 176, 0.22) !important;
+}
+
+/* One-click quick fill title */
+div[style*="text-transform: uppercase"][style*="letter-spacing"] {
+  color: var(--text-secondary) !important;
+  font-weight: 700 !important;
+}
+
+/* ==============================================================
+   7. FORM INPUTS & SELECTS
+   ============================================================== */
+.form-input,
+.form-select {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 10px !important;
+  font-family: var(--font-sans) !important;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 3px var(--accent-primary-glow) !important;
+  outline: none !important;
+}
+
+/* ==============================================================
+   8. BADGES & STATUS PILLS
+   ============================================================== */
+.badge {
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.04em !important;
+}
+
+.badge-green {
+  background: rgba(77, 182, 172, 0.15) !important;
+  color: #4DB6AC !important;
+  border: 1px solid rgba(77, 182, 172, 0.3) !important;
+}
+
+.badge-blue {
+  background: rgba(91, 155, 176, 0.15) !important;
+  color: #5B9BB0 !important;
+  border: 1px solid rgba(91, 155, 176, 0.3) !important;
+}
+
+.badge-amber {
+  background: rgba(245, 166, 35, 0.15) !important;
+  color: #F5A623 !important;
+  border: 1px solid rgba(245, 166, 35, 0.3) !important;
+}
+
+/* ==============================================================
+   9. STAT CARDS (NUMERICAL HIGHLIGHTS)
+   ============================================================== */
+div[style*="font-size: 32px"] {
+  font-family: var(--font-mono) !important;
+  font-weight: 800 !important;
+}
+
+/* Stat color remaps */
+div[style*="font-size: 32px"][style*="accent-success"] {
+  color: var(--accent-success) !important;
+}
+
+div[style*="font-size: 32px"][style*="accent-purple"] {
+  color: var(--accent-primary) !important;
+}
+
+/* Assigned bay slot number text */
+div[style*="font-size: 26px"][style*="slot"] {
+  color: var(--accent-primary) !important;
+}
+
+/* ==============================================================
+   10. FOOTER
+   ============================================================== */
+footer,
+div[style*="border-top"][style*="padding: 16px 32px"] {
+  background: var(--bg-card) !important;
+  border-top: 1px solid var(--border-color) !important;
+  color: var(--text-muted) !important;
+  backdrop-filter: blur(12px) !important;
+}

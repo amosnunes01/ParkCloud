@@ -1,0 +1,14 @@
+.git
+.github
+*.exe
+*.dll
+*.pak
+*.dat
+*.bin
+locales/
+resources/
+node_modules/
+.DS_Store
+*.log
+.env.local
+.vscode

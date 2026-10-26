@@ -1,0 +1,14 @@
+{
+  "name": "parkcloud-desktop",
+  "version": "1.0.0",
+  "description": "ParkCloud Smart Parking Management Desktop Application",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "dependencies": {
+    "chart.js": "^4.4.7",
+    "lucide-react": "^0.475.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^18.3.1"
+  }
+}
