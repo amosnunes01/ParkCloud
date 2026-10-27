@@ -8,7 +8,7 @@
 
 **ParkCloud** is a production-grade, cloud-native smart parking management and mobility telemetry platform tailored for high-density metropolitan areas across India (Mumbai, Pune, Hyderabad, and Bengaluru).
 
-It provides real-time slot discovery, touchless FASTag-integrated check-in/check-out, automated GST-compliant tax invoicing, role-based personal driver analytics, and administrative intelligence (occupancy forecasting, rush-hour distribution, and S3-backed compliance audits).
+It provides real-time slot discovery, touchless digital check-in/check-out, automated GST-compliant tax invoicing, role-based personal driver analytics, and administrative intelligence (occupancy forecasting, rush-hour distribution, and S3-backed compliance audits).
 
 ---
 
@@ -42,7 +42,7 @@ docker compose up -d --build
 
 | Role | Email | Password | Features Accessible |
 |---|---|---|---|
-| **Driver / Commuter** | `rahul.sharma@example.com` | `User@ParkCloud2026!` | Slot booking, FASTag wallet, Driver Personal Analytics, GST Tax Invoices |
+| **Driver / Commuter** | `rahul.sharma@example.com` | `User@ParkCloud2026!` | Slot booking, digital pass QR, Driver Personal Analytics, GST Tax Invoices |
 | **Administrator** | `admin@parkcloud.in` | `Admin@ParkCloud2026!` | Boom barrier scanner, Operational Heatmaps, S3 Audit Reports, Lot & Slot Config |
 
 ---
@@ -129,7 +129,7 @@ ParkCloud/
 ### 1. Commuter & Driver Experience
 - **Live Bay Discovery:** Interactive availability across Mumbai, Pune, Hyderabad, and Bengaluru.
 - **Categorized Slots:** Four-Wheelers, Two-Wheelers, and dedicated EV Charging points.
-- **FASTag Auto-Debit:** Touchless barrier entry simulation.
+- **Digital Parking Pass:** Instant scannable QR pass for contactless gate entry.
 - **Driver Personal Analytics:** Personal trip count, monthly spending bar charts, and bay frequency breakdown.
 - **Downloadable GST Invoices:** Auto-generated PDF tax invoices with SAC code `996742` and 18% GST (CGST 9% + SGST 9%).
 
@@ -146,7 +146,7 @@ ParkCloud/
 
 ParkCloud is deployed live in AWS region **`ap-south-1` (Mumbai)** inside account **Bryson (`247842832040`)**:
 
-- **Live URL:** [http://15.207.71.247](http://15.207.71.247)
+- **Live URL:** [http://13.203.192.73](http://13.203.192.73)
 - **EC2 Instance:** `parkcloud-bryson-web` (`i-0dc1a66948a62d66f`)
 - **S3 Bucket:** `parkcloud-storage-ap-south-1-i4dkpdh5`
 - **IAM Role:** `parkcloud-ec2-s3-role` (with `parkcloud-ec2-s3-profile`)

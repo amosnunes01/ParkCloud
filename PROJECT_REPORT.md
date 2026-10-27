@@ -7,7 +7,7 @@
 **Target Cloud Platform:** Amazon Web Services (AWS)  
 **Primary Region:** Asia Pacific (Mumbai) — `ap-south-1`  
 **Target AWS Account:** Bryson (`247842832040`)  
-**Live Endpoint:** `http://15.207.71.247`  
+**Live Endpoint:** `http://13.203.192.73`  
 **Compliance Standard:** Digital Personal Data Protection (DPDP) Act 2023 & Indian GST Regulations  
 
 ---
@@ -30,7 +30,7 @@
 Urban vehicle density across Indian metropolitan areas (Mumbai, Pune, Hyderabad, and Bengaluru) has created severe parking supply friction, compounding street congestion, carbon emissions, and operational losses for commercial facilities. **ParkCloud (India Edition)** is a full-stack, cloud-native smart parking and mobility telemetry platform designed to resolve these inefficiencies.
 
 ParkCloud provides end-to-end digitisation of the parking lifecycle:
-- **For Commuters:** Real-time multi-bay discovery, dynamic slot allocation (Two-Wheeler, Four-Wheeler, and EV), simulated FASTag auto-debit payments, personal usage analytics, and downloadable GST-compliant tax invoices.
+- **For Commuters:** Real-time multi-bay discovery, dynamic slot allocation (Two-Wheeler, Four-Wheeler, and EV), digital parking pass verification, personal usage analytics, and downloadable GST-compliant tax invoices.
 - **For Facility Operators:** Boom barrier gate operations, system-wide live occupancy telemetry, 24-hour peak-hour distribution tracking, statistical predictive forecasting, utilization heatmaps, and automated Amazon S3-backed compliance audits.
 
 The solution is deployed entirely within AWS account **Bryson (`247842832040`)** in the Mumbai region (`ap-south-1`), following AWS Well-Architected principles: IAM role-based authentication without hardcoded credentials, isolated VPC networking, reverse-proxied traffic routing, and persistent cloud object storage.
@@ -69,7 +69,7 @@ flowchart TD
         subgraph PublicSubnet ["Public Subnet: subnet-0abdb9066f3813609 (ap-south-1b)"]
             SG["Security Group: parkcloud-app-sg\nPorts: 80 (HTTP), 22 (SSH)"]
             
-            subgraph EC2Instance ["EC2 Instance: parkcloud-bryson-web (15.207.71.247)"]
+            subgraph EC2Instance ["EC2 Instance: parkcloud-bryson-web (13.203.192.73)"]
                 Nginx["Nginx 1.30 Reverse Proxy\n(Port 80)"]
                 StaticFiles["Static React SPA Bundle\n(/usr/share/nginx/html)"]
                 NodeAPI["Node.js REST Service\n(Port 5000 / systemd)"]
@@ -105,7 +105,7 @@ flowchart TD
 | **AWS Account** | `247842832040` | Bryson Enterprise Root/Sub-account | Governance & billing boundary |
 | **AWS Region** | `ap-south-1` | Mumbai, India | Low-latency local hosting & DPDP residency |
 | **Amazon EC2** | `i-0dc1a66948a62d66f` | `parkcloud-bryson-web` (AL2023) | Application & web server compute |
-| **Public IP** | `15.207.71.247` | IPv4 (Auto-assigned / Elastic) | Public ingress endpoint |
+| **Public IP** | `13.203.192.73` | IPv4 (Auto-assigned / Elastic) | Public ingress endpoint |
 | **Private IP** | `10.0.2.182` | IPv4 Private Subnet Address | Internal VPC routing |
 | **Amazon VPC** | `vpc-05a886216709e3a75` | 10.0.0.0/16 Virtual Private Cloud | Network isolation boundary |
 | **Subnet** | `subnet-0abdb9066f3813609` | Public Subnet in `ap-south-1b` | Ingress gateway mapping |
@@ -129,7 +129,7 @@ flowchart LR
 
     subgraph DriverWorkflow ["Driver Experience (Role: USER)"]
         D1["Explore Bays & Lots"] --> D2["Select Vehicle & Slot"]
-        D2 --> D3["Confirm FASTag Booking"]
+        D2 --> D3["Confirm Slot Booking"]
         D3 --> D4["Personal Analytics Dashboard"]
         D3 --> D5["Download GST Tax Invoices"]
     end
@@ -153,7 +153,7 @@ flowchart LR
    - Slot breakdown by categories: Standard Four-Wheeler, Two-Wheeler, and dedicated EV Charging bays with differentiated pricing.
 2. **Vehicle Fleet Registry:**
    - Registration for personal vehicles supporting Indian High Security Registration Plates (HSRP) and Bharat Series formats (e.g., `MH02AB1234`, `22BH1234AA`).
-   - Simulated integration with ICICI Bank FASTag auto-debit for paperless billing.
+   - Digital pass QR generation with contactless gate barrier verification.
 3. **Personal Driver Analytics:**
    - **Total Trips Completed:** Cumulative count with on-time arrival tracking.
    - **Total Parking Spend:** Real-time calculation including GST breakdown.
@@ -330,23 +330,23 @@ echo "SUCCESS: ParkCloud deployment complete."
 ## 8. Verification, Testing & Performance
 
 ### 8.1 API Endpoint Verification Suite
-Tests executed against live endpoint `http://15.207.71.247`:
+Tests executed against live endpoint `http://13.203.192.73`:
 
 ```bash
 # 1. Verify S3 File Registry Metadata
-curl -s http://15.207.71.247/api/files | jq .
+curl -s http://13.203.192.73/api/files | jq .
 # Result: 200 OK — Returns S3 bucket parkcloud-storage-ap-south-1-i4dkpdh5 records
 
 # 2. Verify Invoice PDF Generation Stream
-curl -sI http://15.207.71.247/api/download/invoice/2683
+curl -sI http://13.203.192.73/api/download/invoice/2683
 # Result: 200 OK — Content-Type: application/pdf, Content-Disposition: attachment
 
 # 3. Verify Driver Analytics Aggregation
-curl -s http://15.207.71.247/api/analytics/driver | jq .
+curl -s http://13.203.192.73/api/analytics/driver | jq .
 # Result: 200 OK — Returns totalTrips, totalSpent (with GST), and monthly series
 
 # 4. Verify System Audit PDF Stream
-curl -sI http://15.207.71.247/api/download/101
+curl -sI http://13.203.192.73/api/download/101
 # Result: 200 OK — Content-Type: application/pdf, valid binary header %PDF-1.4
 ```
 
