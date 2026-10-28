@@ -330,7 +330,7 @@ WantedBy=multi-user.target
 To push build updates from S3 staging to the active EC2 instance, execute:
 
 ```bash
-sudo curl -sSL "https://s3.eu-north-1.amazonaws.com/10683-amos/parkcloud_build.tar.gz" -o /tmp/parkcloud_build.tar.gz && \
+sudo curl -sSL "https://10683-amos.s3.eu-north-1.amazonaws.com/parkcloud_build.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA6HMBUJ7UGVKLLBT6%2F20261028%2Feu-north-1%2Fs3%2Faws4_request&X-Amz-Date=20261028T044239Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=4cc7801709105459ba2580f6ced5380afa1b046d7bd319f477af7a7baa8dfbeb" -o /tmp/parkcloud_build.tar.gz && \
 sudo tar -zxvf /tmp/parkcloud_build.tar.gz -C /usr/share/nginx/html && \
 sudo cp /usr/share/nginx/html/mock-api.js /opt/parkcloud/mock-api.js && \
 sudo chmod -R 755 /usr/share/nginx/html && \

@@ -191,6 +191,7 @@ const bookings = [
     vehicleType: 'FOUR_WHEELER',
     startTimeIST: '21/10/2026, 01:05 pm',
     scheduled_start: '2026-10-21T07:35:00Z',
+    scheduled_end: '2026-10-21T09:35:00Z',
     accrued_fee: '₹118.00',
     estimated_fee: '₹118.00',
     amount: 118,
@@ -215,6 +216,7 @@ const bookings = [
     vehicleType: 'FOUR_WHEELER',
     startTimeIST: '20/10/2026, 12:35 pm',
     scheduled_start: '2026-10-20T07:05:00Z',
+    scheduled_end: '2026-10-20T09:05:00Z',
     accrued_fee: '₹141.60',
     estimated_fee: '₹141.60',
     amount: 141.6,
@@ -239,6 +241,7 @@ const bookings = [
     vehicleType: 'FOUR_WHEELER',
     startTimeIST: '15/10/2026, 09:00 am',
     scheduled_start: '2026-10-15T03:30:00Z',
+    scheduled_end: '2026-10-15T05:30:00Z',
     accrued_fee: '₹240.00',
     estimated_fee: '₹240.00',
     amount: 240,
@@ -279,15 +282,41 @@ const files = [
 ];
 
 // ─── SLOTS GENERATOR ─────────────────────────────────────────
+// ID ranges: FOUR_WHEELER → 1000+i, TWO_WHEELER → 2000+i, EV → 3000+i, OTHER → 4000+i
+function getSlotIdBase(vehicleType) {
+  if (vehicleType === 'TWO_WHEELER') return 2000;
+  if (vehicleType === 'EV') return 3000;
+  return 1000; // FOUR_WHEELER and all others
+}
+
+function getSlotPrefix(vehicleType) {
+  if (vehicleType === 'TWO_WHEELER') return 'B';
+  if (vehicleType === 'EV') return 'EV';
+  return 'P1';
+}
+
+// Resolve a numeric slotId back to its slot_number string
+function resolveSlotNumber(slotId) {
+  const id = parseInt(slotId);
+  if (isNaN(id)) return null;
+  let prefix, index;
+  if (id > 3000 && id <= 3020) { prefix = 'EV'; index = id - 3000; }
+  else if (id > 2000 && id <= 2020) { prefix = 'B'; index = id - 2000; }
+  else if (id > 1000 && id <= 1020) { prefix = 'P1'; index = id - 1000; }
+  else return null;
+  return `${prefix}-${String(index).padStart(2, '0')}`;
+}
+
 function generateSlotsForLot(lot, vehicleType) {
-  const prefix = vehicleType === 'TWO_WHEELER' ? 'B' : vehicleType === 'EV' ? 'EV' : 'P1';
+  const prefix = getSlotPrefix(vehicleType);
+  const idBase = getSlotIdBase(vehicleType);
   const category = vehicleType === 'EV' ? 'EV_CHARGING' : (vehicleType === 'TWO_WHEELER' ? 'TWO_WHEELER' : 'STANDARD');
   const slots = [];
   
   for (let i = 1; i <= 20; i++) {
     const isOccupied = i === 2 || (i % 4 === 0);
     slots.push({
-      id: 1000 + i,
+      id: idBase + i,
       lot_id: lot.id,
       slot_number: `${prefix}-${String(i).padStart(2, '0')}`,
       slotNumber: `${prefix}-${String(i).padStart(2, '0')}`,
@@ -445,6 +474,27 @@ const server = http.createServer(async (req, res) => {
     const lot = lots.find(l => l.id === parseInt(availMatch[1])) || lots[0];
     const vehicleType = parsed.query.vehicleType || 'FOUR_WHEELER';
     const slots = generateSlotsForLot(lot, vehicleType);
+
+    // Cross-reference existing bookings to mark slots as unavailable
+    const reqStart = parsed.query.startTime ? new Date(decodeURIComponent(parsed.query.startTime)) : null;
+    const reqEnd = parsed.query.endTime ? new Date(decodeURIComponent(parsed.query.endTime)) : null;
+    if (reqStart && reqEnd && !isNaN(reqStart) && !isNaN(reqEnd)) {
+      slots.forEach(slot => {
+        const hasConflict = bookings.some(b =>
+          b.lot_id === lot.id &&
+          (b.slot_number === slot.slot_number || b.slotNumber === slot.slotNumber) &&
+          (b.status === 'CONFIRMED' || b.status === 'ACTIVE') &&
+          b.scheduled_start && b.scheduled_end &&
+          new Date(b.scheduled_start) < reqEnd &&
+          new Date(b.scheduled_end) > reqStart
+        );
+        if (hasConflict) {
+          slot.is_available = false;
+          slot.isAvailable = false;
+        }
+      });
+    }
+
     return json(res, {
       success: true,
       lot,
@@ -459,6 +509,27 @@ const server = http.createServer(async (req, res) => {
     const lot = lots.find(l => l.id === parseInt(slotsMatch[1])) || lots[0];
     const vehicleType = parsed.query.vehicleType || 'FOUR_WHEELER';
     const slots = generateSlotsForLot(lot, vehicleType);
+
+    // Cross-reference existing bookings to mark slots as unavailable
+    const reqStart = parsed.query.startTime ? new Date(decodeURIComponent(parsed.query.startTime)) : null;
+    const reqEnd = parsed.query.endTime ? new Date(decodeURIComponent(parsed.query.endTime)) : null;
+    if (reqStart && reqEnd && !isNaN(reqStart) && !isNaN(reqEnd)) {
+      slots.forEach(slot => {
+        const hasConflict = bookings.some(b =>
+          b.lot_id === lot.id &&
+          (b.slot_number === slot.slot_number || b.slotNumber === slot.slotNumber) &&
+          (b.status === 'CONFIRMED' || b.status === 'ACTIVE') &&
+          b.scheduled_start && b.scheduled_end &&
+          new Date(b.scheduled_start) < reqEnd &&
+          new Date(b.scheduled_end) > reqStart
+        );
+        if (hasConflict) {
+          slot.is_available = false;
+          slot.isAvailable = false;
+        }
+      });
+    }
+
     return json(res, { success: true, slots });
   }
 
@@ -502,7 +573,32 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const lot = lots.find(l => l.id === (body.lot_id || body.lotId)) || lots[0];
     const veh = vehicles.find(v => v.id === (body.vehicle_id || body.vehicleId)) || vehicles[0];
-    
+
+    // Resolve slot_number: frontend sends slotId (numeric ID), not slotNumber
+    let slotNumber = body.slotNumber || body.slot_number;
+    if (!slotNumber && body.slotId) {
+      slotNumber = resolveSlotNumber(body.slotId);
+    }
+    if (!slotNumber) slotNumber = 'P1-05';
+    const startTime = body.startTime ? new Date(body.startTime) : new Date();
+    const endTime = body.endTime ? new Date(body.endTime) : new Date(startTime.getTime() + 2 * 3600000);
+
+    // Prevent double-booking: reject if an overlapping CONFIRMED/ACTIVE booking exists for this lot + slot
+    const conflict = bookings.find(b =>
+      b.lot_id === lot.id &&
+      (b.slot_number === slotNumber || b.slotNumber === slotNumber) &&
+      (b.status === 'CONFIRMED' || b.status === 'ACTIVE') &&
+      b.scheduled_start && b.scheduled_end &&
+      new Date(b.scheduled_start) < endTime &&
+      new Date(b.scheduled_end) > startTime
+    );
+    if (conflict) {
+      return json(res, {
+        success: false,
+        error: `Slot ${slotNumber} is already booked for the selected time window (Ref: ${conflict.booking_reference || conflict.bookingReference}).`
+      }, 409);
+    }
+
     const b = {
       id: nextBookingId++,
       booking_reference: `PC-BKG-${nextBookingId}`,
@@ -513,14 +609,15 @@ const server = http.createServer(async (req, res) => {
       lotName: lot.name,
       lot_address: lot.address,
       lot_city: lot.city,
-      slot_number: body.slotNumber || body.slot_number || 'P1-05',
-      slotNumber: body.slotNumber || body.slot_number || 'P1-05',
+      slot_number: slotNumber,
+      slotNumber: slotNumber,
       registration_number: veh ? veh.registration_number : '22BH1234AA',
       registrationNumber: veh ? veh.registration_number : '22BH1234AA',
       vehicle_type: veh ? veh.vehicle_type : 'FOUR_WHEELER',
       vehicleType: veh ? veh.vehicle_type : 'FOUR_WHEELER',
       startTimeIST: new Date().toLocaleDateString('en-IN') + ', ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-      scheduled_start: body.startTime || new Date().toISOString(),
+      scheduled_start: startTime.toISOString(),
+      scheduled_end: endTime.toISOString(),
       accrued_fee: `₹${body.amount || 118}.00`,
       estimated_fee: `₹${body.amount || 118}.00`,
       amount: body.amount || 118,
@@ -879,6 +976,27 @@ startxref
   // ── HEALTH ──
   if (path === '/api/health' || path === '/health') {
     return json(res, { status: 'ok', timestamp: new Date().toISOString() });
+  }
+
+  // ── STATIC FILE SERVING (Frontend SPA) ──
+  const fs = require('fs');
+  const pathMod = require('path');
+  const distDir = pathMod.join(__dirname);
+  const mimeTypes = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2' };
+  let filePath = pathMod.join(distDir, path === '/' ? 'index.html' : path);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    const ext = pathMod.extname(filePath);
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    const content = fs.readFileSync(filePath);
+    res.writeHead(200, { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*' });
+    return res.end(content);
+  }
+  // SPA fallback: serve index.html for all non-API routes
+  const indexPath = pathMod.join(distDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    const content = fs.readFileSync(indexPath);
+    res.writeHead(200, { 'Content-Type': 'text/html', 'Access-Control-Allow-Origin': '*' });
+    return res.end(content);
   }
 
   json(res, { success: true });
