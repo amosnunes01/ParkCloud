@@ -241,20 +241,33 @@ startxref
 
 ---
 
-## 6. Security, Identity & Compliance
+## 6. Security Handling in Application and Cloud Setup (R4 Evaluation Rubric)
 
-### 6.1 IAM Least-Privilege Architecture
-- **Zero Static Credentials:** The application runtime on EC2 does not contain any AWS access keys or secret keys in environment variables, configuration files, or source code.
-- **Instance Profile Delegation:** The EC2 instance assumes `parkcloud-ec2-s3-role` via AWS Security Token Service (STS) through instance metadata service (IMDSv2), rotating temporary credentials automatically.
-- **S3 Access Scoping:** Permissions are granted specifically for bucket operations (`s3:GetObject`, `s3:PutObject`, `s3:ListBucket`) within `parkcloud-storage-ap-south-1-i4dkpdh5`.
+### 6.1 Application Authentication & Role-Based Access Control (RBAC)
+- **Session Token Verification:** Protected API endpoints enforce token-based verification via HTTP headers; unauthenticated sessions are blocked and redirected to `/login`.
+- **Strict Role Separation:** Complete operational boundary between `USER` (Driver) and `ADMIN` (Operator). Commuters can only inspect their own vehicle records, booking IDs, driver spending analytics, and personal tax invoices. System-wide utilization heatmaps, gate barrier scanners, and RDS lot tariffs are strictly inaccessible to regular drivers.
 
-### 6.2 Network Security & Ingress Filtering
+### 6.2 Application Hardening, Security Headers & Container Isolation
+- **Input Validation:** Strict server-side regex verification on all user-supplied inputs, including Indian High-Security Registration Plates (`^[0-9]{2}[A-Z]{2}[0-9]{4}[A-Z]{2}$`) and Bharat (`BH`) series formats.
+- **HTTP Security Headers:** Nginx enforces defense-in-depth headers:
+  - `X-Frame-Options: SAMEORIGIN` (mitigates Clickjacking attacks)
+  - `X-Content-Type-Options: nosniff` (prevents MIME-type confusion attacks)
+  - `X-XSS-Protection: 1; mode=block` (browser-side cross-site scripting filter)
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+- **Docker Container Hardening:** In containerized environments, backend processes execute under an unprivileged non-root user (`parkcloud:nodejs`, UID 1001) on Alpine Linux. The internal API port 5000 is isolated in an internal bridge network (`parkcloud-network`).
+
+### 6.3 IAM Least-Privilege Architecture & Zero Static Credentials
+- **Zero Hardcoded Secrets:** The application runtime on EC2 contains **zero static AWS credentials** (no `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` in environment variables, configuration files, or code repositories).
+- **Instance Profile Delegation:** The EC2 instance assumes `parkcloud-ec2-s3-role` dynamically via AWS Security Token Service (STS) through IMDSv2, ensuring automatic cryptographic credential rotation.
+- **S3 Access Scoping:** Permissions are scoped specifically for bucket operations (`s3:GetObject`, `s3:PutObject`, `s3:ListBucket`) within `parkcloud-storage-ap-south-1-i4dkpdh5`.
+
+### 6.4 Network Security & Ingress Filtering
 - The security group `parkcloud-app-sg` restricts ingress strictly to:
   - Port `80` (HTTP): Public ingress for web traffic.
   - Port `22` (SSH): Authorized administrative access via EC2 Instance Connect.
 - Internal service port `5000` (Node.js API) is bound strictly to `127.0.0.1` and is unreachable directly from the external internet, enforcing reverse proxy mediation by Nginx.
 
-### 6.3 Regulatory & Fiscal Compliance
+### 6.5 Regulatory & Fiscal Compliance
 - **Digital Personal Data Protection (DPDP) Act 2023:** All booking telemetry, commuter phone numbers, and vehicle registration numbers remain localized within AWS Mumbai (`ap-south-1`), satisfying data residency requirements.
 - **Goods and Services Tax (GST) Integration:**
   - Service Accounting Code (SAC): `996742` (Supporting services for road transport - parking services).
